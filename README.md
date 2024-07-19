@@ -33,8 +33,8 @@ result.subscribe((array) => console.log(array))
 
 ### mergeMapArray
 
-```
-mergeMapArray<T, R>(project: (item: T) => Observable<R>, isEqual?: (a: T, b: T) => boolean): OperatorFunction<T[], R[]>
+```ts
+declare function mergeMapArray<T, R>(project: (item: T) => Observable<R>, isEqual?: (a: T, b: T) => boolean): OperatorFunction<T[], R[]>
 ```
 
 ## License
