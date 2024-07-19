@@ -1,0 +1,77 @@
+{
+  "name": "rxjs-mergemap-array",
+  "version": "0.0.0",
+  "description": "",
+  "keywords": [
+    "rxjs",
+    "rx",
+    "observable",
+    "array",
+    "map",
+    "mergeMap"
+  ],
+  "homepage": "https://github.com/bjoerge/rxjs-mergemap-array#readme",
+  "bugs": {
+    "url": "https://github.com/bjoerge/rxjs-mergemap-array/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/bjoerge/rxjs-mergemap-array.git"
+  },
+  "license": "MIT",
+  "author": "Bjørge Næss <bjoerge@gmail.com>",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "pkg build --strict --clean --check",
+    "format": "prettier --write --cache --ignore-unknown .",
+    "lint": "eslint . --ext .cjs,.js,.ts,.tsx",
+    "prepublishOnly": "npm run build",
+    "test": "vitest --run",
+    "ts:check": "tsc --noEmit"
+  },
+  "lint-staged": {
+    "*": [
+      "prettier --write --cache --ignore-unknown"
+    ]
+  },
+  "prettier": "@sanity/prettier-config",
+  "dependencies": {},
+  "devDependencies": {
+    "@sanity/pkg-utils": "^6.10.6",
+    "@sanity/prettier-config": "^1.0.2",
+    "@typescript-eslint/eslint-plugin": "^7.16.1",
+    "@typescript-eslint/parser": "^7.16.1",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "lint-staged": "^15.2.7",
+    "prettier": "^3.3.3",
+    "rxjs": "^7.8.1",
+    "typescript": "^5.5.3",
+    "vitest": "^2.0.3"
+  },
+  "peerDependencies": {
+    "rxjs": "7.x"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
