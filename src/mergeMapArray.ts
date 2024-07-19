@@ -7,7 +7,7 @@ type State<T> = {
   removed: T[]
 }
 
-const INITIAL_STATE: State<any> = {
+const INITIAL_STATE: State<never> = {
   current: [],
   added: [],
   removed: [],
@@ -49,10 +49,10 @@ export function mergeMapArray<T, R>(
       .pipe(share())
 
     // emits elements as they are added to the input array
-    const added$ = state$.pipe(mergeMap((state) => state.removed))
+    const removed$ = state$.pipe(mergeMap((state) => state.removed))
 
     // emits elements as they are removed from the input array
-    const removed$ = state$.pipe(mergeMap((state) => state.added))
+    const added$ = state$.pipe(mergeMap((state) => state.added))
 
     // special case for empty input array since it won't trigger any emission on the "add element" stream
     const empty = source.pipe(
@@ -60,13 +60,13 @@ export function mergeMapArray<T, R>(
       map(() => EMPTY_ARRAY),
     )
 
-    const mapped = removed$.pipe(
-      mergeMap((item) =>
-        project(item).pipe(
-          takeUntil(added$.pipe(filter((k) => isEqual(k, item)))),
-          map((projected): [T, R] => [item, projected]),
-          map(([item, projected]): {item: T; projected: R} => ({
-            item,
+    const mapped = added$.pipe(
+      mergeMap((element) =>
+        project(element).pipe(
+          takeUntil(removed$.pipe(filter((k) => isEqual(k, element)))),
+          map((projected): [T, R] => [element, projected]),
+          map(([inputElement, projected]): {element: T; projected: R} => ({
+            element: inputElement,
             projected,
           })),
         ),
@@ -75,7 +75,7 @@ export function mergeMapArray<T, R>(
       scan(
         (acc: (undefined | {item: T; emitted: boolean; value: R})[], [next, input]) =>
           input.map((item) => {
-            if (isEqual(item, next.item)) {
+            if (isEqual(item, next.element)) {
               return {item, emitted: true, value: next.projected}
             }
             // find the entry from the previous emission and move it to the right place

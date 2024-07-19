@@ -1,15 +1,15 @@
-import {delay, toArray} from "rxjs/operators"
-import {concat, firstValueFrom, of, Subject, timer} from "rxjs"
+import {concat, firstValueFrom, of, Subject, timer} from 'rxjs'
+import {delay, toArray} from 'rxjs/operators'
+import {describe, expect, it} from 'vitest'
 
-import {describe, expect, it} from "vitest"
-import {mergeMapArray} from "./mergeMapArray"
+import {mergeMapArray} from './mergeMapArray'
 
-describe("mergeMapArray()", () => {
-  it("works with an empty array as input", async () => {
+describe('mergeMapArray()', () => {
+  it('works with an empty array as input', async () => {
     const subject = new Subject<{id: number}[]>()
 
     const observable = subject.asObservable().pipe(
-      mergeMapArray((item) => timer(1000)),
+      mergeMapArray(() => timer(1000)),
       toArray(),
     )
     const promise = firstValueFrom(observable)
@@ -22,7 +22,7 @@ describe("mergeMapArray()", () => {
     `)
   })
 
-  it("orders the output array based on the input array", async () => {
+  it('orders the output array based on the input array', async () => {
     const one = {id: 1}
     const two = {id: 2}
     const three = {id: 3}
@@ -102,7 +102,7 @@ describe("mergeMapArray()", () => {
     `)
   })
 
-  it("works with duplicate elements", async () => {
+  it('works with duplicate elements', async () => {
     const one = {id: 1}
     const two = {id: 2}
     const three = {id: 3}
@@ -111,10 +111,7 @@ describe("mergeMapArray()", () => {
 
     const observable = subject.asObservable().pipe(
       mergeMapArray((item) => {
-        return concat(
-          of(`id=${item.id} #1`),
-          of(`id=${item.id} #2`).pipe(delay(20)),
-        )
+        return concat(of(`id=${item.id} #1`), of(`id=${item.id} #2`).pipe(delay(20)))
       }),
       toArray(),
     )
@@ -145,7 +142,7 @@ describe("mergeMapArray()", () => {
     `)
   })
 
-  it("works with multiple emissions", async () => {
+  it('works with multiple emissions', async () => {
     const one = {id: 1}
     const two = {id: 2}
     const three = {id: 3}
@@ -154,10 +151,7 @@ describe("mergeMapArray()", () => {
 
     const observable = subject.asObservable().pipe(
       mergeMapArray((item) => {
-        return concat(
-          of(`id=${item.id} #1`),
-          of(`id=${item.id} #2`).pipe(delay(20)),
-        )
+        return concat(of(`id=${item.id} #1`), of(`id=${item.id} #2`).pipe(delay(20)))
       }),
       toArray(),
     )
@@ -197,7 +191,7 @@ describe("mergeMapArray()", () => {
     `)
   })
 
-  it("supports custom isEqual", async () => {
+  it('supports custom isEqual', async () => {
     const one = {id: 1}
     const anotherone = {id: 1}
 
