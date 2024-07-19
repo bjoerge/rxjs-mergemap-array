@@ -26,9 +26,9 @@ export function mergeMapArray<T, R>(
   project: (item: T) => Observable<R>,
   isEqual: (a: T, b: T) => boolean = (a, b) => a === b,
 ): (source: Observable<T[]>) => Observable<R[]> {
-  return (source: Observable<T[]>): Observable<R[]> => {
-    const source$ = source.pipe(share())
-    const state$ = source
+  return (input: Observable<T[]>): Observable<R[]> => {
+    const sharedInput = input.pipe(share())
+    const state$ = sharedInput
       .pipe(
         scan((state: State<T>, next: T[]) => {
           const added = next.filter(
@@ -55,7 +55,7 @@ export function mergeMapArray<T, R>(
     const added$ = state$.pipe(mergeMap((state) => state.added))
 
     // special case for empty input array since it won't trigger any emission on the "add element" stream
-    const empty = source.pipe(
+    const empty = sharedInput.pipe(
       filter((arr) => arr.length === 0),
       map(() => EMPTY_ARRAY),
     )
@@ -71,10 +71,10 @@ export function mergeMapArray<T, R>(
           })),
         ),
       ),
-      withLatestFrom(source$),
+      withLatestFrom(sharedInput),
       scan(
-        (acc: (undefined | {item: T; emitted: boolean; value: R})[], [next, input]) =>
-          input.map((item) => {
+        (acc: (undefined | {item: T; emitted: boolean; value: R})[], [next, inputArray]) =>
+          inputArray.map((item) => {
             if (isEqual(item, next.element)) {
               return {item, emitted: true, value: next.projected}
             }
