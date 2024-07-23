@@ -1,6 +1,6 @@
 {
   "name": "rxjs-mergemap-array",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "An RxJS map operator that takes an observable of arrays as input and emits arrays where each element represents emissions from the projected observable.",
   "keywords": [
     "rxjs",
