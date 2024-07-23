@@ -91,6 +91,10 @@ describe('mergeMapArray()', () => {
           "id=3 #1",
         ],
         [
+          "id=1 #1",
+          "id=2 #1",
+        ],
+        [
           "id=1 #2",
           "id=2 #1",
         ],
@@ -129,6 +133,10 @@ describe('mergeMapArray()', () => {
           "id=1 #1",
           "id=2 #1",
           "id=3 #1",
+        ],
+        [
+          "id=1 #1",
+          "id=2 #1",
         ],
         [
           "id=1 #2",
@@ -172,8 +180,23 @@ describe('mergeMapArray()', () => {
         ],
         [
           "id=1 #1",
+        ],
+        [
+          "id=1 #1",
           "id=2 #1",
           "id=3 #1",
+        ],
+        [
+          "id=1 #1",
+          "id=3 #1",
+        ],
+        [
+          "id=1 #1",
+          "id=3 #1",
+        ],
+        [
+          "id=1 #1",
+          "id=2 #1",
         ],
         [
           "id=1 #1",
@@ -233,4 +256,48 @@ describe('mergeMapArray()', () => {
       ]
     `)
   })
+})
+
+it('waits for all mapped values to emit', async () => {
+  const one = {id: 1}
+  const anotherone = {id: 2}
+  const third = {id: 3}
+
+  const subject = new Subject<{id: number}[]>()
+
+  const observable = subject.asObservable().pipe(
+    mergeMapArray((item) =>
+      item.id === 2
+        ? of(`id=${item.id} #1`).pipe(delay(20))
+        : item.id === 3
+          ? of(`id=${item.id} #1`).pipe(delay(20))
+          : of(`id=${item.id} #1`),
+    ),
+    toArray(),
+  )
+  const promise = firstValueFrom(observable)
+  subject.next([one, anotherone])
+  subject.next([one])
+  await new Promise((resolve) => setTimeout(resolve, 100))
+  subject.next([one, anotherone])
+  await new Promise((resolve) => setTimeout(resolve, 100))
+  subject.next([one, anotherone, third])
+  await new Promise((resolve) => setTimeout(resolve, 100))
+  subject.complete()
+  expect(await promise).toMatchInlineSnapshot(`
+    [
+      [
+        "id=1 #1",
+      ],
+      [
+        "id=1 #1",
+        "id=2 #1",
+      ],
+      [
+        "id=1 #1",
+        "id=2 #1",
+        "id=3 #1",
+      ],
+    ]
+  `)
 })

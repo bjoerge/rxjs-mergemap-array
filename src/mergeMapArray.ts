@@ -46,7 +46,10 @@ export function mergeMapArray<T, R>(
           }
         }, INITIAL_STATE),
       )
-      .pipe(share())
+      .pipe(
+        share(),
+        filter((state) => state.added.length > 0 || state.removed.length > 0),
+      )
 
     // emits elements as they are added to the input array
     const removed$ = state$.pipe(mergeMap((state) => state.removed))
@@ -61,31 +64,30 @@ export function mergeMapArray<T, R>(
     )
 
     const mapped = added$.pipe(
-      mergeMap((element) =>
-        project(element).pipe(
-          takeUntil(removed$.pipe(filter((k) => isEqual(k, element)))),
-          map((projected): [T, R] => [element, projected]),
-          map(([inputElement, projected]): {element: T; projected: R} => ({
-            element: inputElement,
-            projected,
-          })),
-        ),
-      ),
+      mergeMap((element) => {
+        const removed = removed$.pipe(filter((k) => isEqual(k, element))).pipe(share())
+        return merge(
+          removed.pipe(map(() => ({type: 'remove', element}) as const)),
+          project(element).pipe(
+            takeUntil(removed),
+            map((projected) => ({type: 'emit', element, projected}) as const),
+          ),
+        )
+      }),
       withLatestFrom(sharedInput),
-      scan(
-        (acc: (undefined | {item: T; emitted: boolean; value: R})[], [next, inputArray]) =>
-          inputArray.map((item) => {
-            if (isEqual(item, next.element)) {
-              return {item, emitted: true, value: next.projected}
-            }
-            // find the entry from the previous emission and move it to the right place
-            return acc.find((v) => v && isEqual(v.item, item))
-          }),
-        [],
-      ),
+      scan((acc: (undefined | {item: T; emitted: boolean; value: R})[], [event, inputArray]) => {
+        return inputArray.flatMap((item) => {
+          if (isEqual(item, event.element)) {
+            return event.type === 'remove' ? [] : {item, emitted: true, value: event.projected}
+          }
+          // find the entry from the previous emission and move it to the right place
+          return acc.find((v) => v && isEqual(v.item, item))
+        })
+      }, []),
       filter((v) => v.every((item) => item?.emitted)),
       map((v) => v.map((item) => item!.value)),
     )
+
     return merge(empty, mapped)
   }
 }
